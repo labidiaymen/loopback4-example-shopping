@@ -9,8 +9,10 @@ import {toJSON} from '@loopback/testlab';
 import {promisify} from 'util';
 import * as isemail from 'isemail';
 import {HttpErrors} from '@loopback/rest';
+import {UserProfile} from '@loopback/authentication';
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
+const verifyAsync = promisify(jwt.verify);
 
 export async function getAccessTokenForUser(
   userRepository: UserRepository,
@@ -45,4 +47,16 @@ export function validateCredentials(credentials: Credentials) {
       'password must be minimum 8 characters',
     );
   }
+}
+
+// secret should be injected
+export async function decodeAccessToken(
+  token: string,
+  secret: string,
+): Promise<UserProfile> {
+  const decoded = await verifyAsync(token, secret);
+  let user = _.pick(decoded, ['id', 'email', 'firstName']);
+  (user as UserProfile).name = user.firstName;
+  delete user.firstName;
+  return user;
 }
