@@ -17,10 +17,7 @@ import {
   AuthenticationBindings,
 } from '@loopback/authentication';
 import {Credentials} from '../repositories/user.repository';
-import {
-  validateCredentials,
-  getAccessTokenForUser,
-} from '../utils/user.authentication';
+import {JWTAuthenticationService} from '../services/JWT.authentication.service';
 import * as isemail from 'isemail';
 
 const hashAsync = promisify(hash);
@@ -41,6 +38,8 @@ export class UserController {
     @repository(UserRepository) public userRepository: UserRepository,
     @inject('services.RecommenderService')
     public recommender: RecommenderService,
+    @inject('JWT.authentication.service')
+    public jwtAuthService: JWTAuthenticationService,
     @inject.setter(AuthenticationBindings.CURRENT_USER)
     public setCurrentUser: Setter<UserProfile>,
   ) {}
@@ -157,8 +156,8 @@ export class UserController {
   async login(
     @requestBody() credentials: Credentials,
   ): Promise<{token: string}> {
-    validateCredentials(credentials);
-    const token = await getAccessTokenForUser(this.userRepository, credentials);
+    this.jwtAuthService.validateCredentials(credentials);
+    const token = await this.jwtAuthService.getAccessTokenForUser(credentials);
     return {token};
   }
 }

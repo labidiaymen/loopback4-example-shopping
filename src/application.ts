@@ -14,8 +14,10 @@ import {
   AuthenticationBindings,
   AuthenticationComponent,
 } from '@loopback/authentication';
+import {JWTAuthenticationBindings} from './keys';
 import {StrategyResolverProvider} from './providers/strategy.resolver.provider';
 import {AuthenticateActionProvider} from './providers/custom.authentication.provider';
+import {JWTAuthenticationServiceProvider} from './services/JWT.authentication.service';
 
 /**
  * Information from package.json
@@ -39,11 +41,17 @@ export class ShoppingApplication extends BootMixin(
     this.bind(PackageKey).to(pkg);
 
     this.component(AuthenticationComponent);
+
+    // The following bindings is an imply
     this.bind(AuthenticationBindings.AUTH_ACTION).toProvider(
       AuthenticateActionProvider,
     );
     this.bind(AuthenticationBindings.STRATEGY).toProvider(
       StrategyResolverProvider,
+    );
+    this.bind(JWTAuthenticationBindings.SECRET).to('secretforjwt');
+    this.bind(JWTAuthenticationBindings.SERVICE).toProvider(
+      JWTAuthenticationServiceProvider,
     );
 
     // Set up the custom sequence
