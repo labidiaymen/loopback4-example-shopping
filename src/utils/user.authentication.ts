@@ -26,7 +26,6 @@ export async function getAccessTokenForUser(
   }
 
   const currentUser = _.pick(toJSON(foundUser), ['id', 'email', 'firstName']);
-
   // Generate user token using JWT
   const token = await signAsync(currentUser, 'secretforjwt', {
     expiresIn: 300,
